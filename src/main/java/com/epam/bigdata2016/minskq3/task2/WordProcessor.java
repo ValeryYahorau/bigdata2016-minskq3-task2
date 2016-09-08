@@ -1,145 +1,75 @@
 package com.epam.bigdata2016.minskq3.task2;
 
-import java.net.URI;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
 import java.util.function.Function;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static java.util.Comparator.reverseOrder;
-import static java.util.stream.Collectors.counting;
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.*;
 
-/**
- * Created by valeryyegorov on 30.08.16.
- */
 public class WordProcessor {
 
-    public void run(String[] args) {
+    private List<String> stopWords = Arrays.asList("a", "and", "for", "to", "the", "you", "in");
 
+    public static void main(String[] args) throws Exception {
+        final String inputPath = args[0];
+        final int startN = Integer.valueOf(args[1]);
+        final int endN = Integer.valueOf(args[2]);
+        WordProcessor wp = new WordProcessor();
+        wp.run(inputPath, startN, endN);
+    }
 
+    public void run(String inputPath, int startN, int endN) {
 
-
-        try{
-            Pattern p = Pattern.compile("http://www.miniinthebox.com[^\\n]*");
-            List<String> urls = new ArrayList<String>();
-
-            Path pt=new Path("hdfs://sandbox.hortonworks.com:8020/tmp/admin/user.profile.tags.us.min.txt");
-
-            Configuration conf = new Configuration();
-            conf.set("fs.hdfs.impl", org.apache.hadoop.hdfs.DistributedFileSystem.class.getName());
-            conf.set("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem.class.getName());
-
-            FileSystem fs = FileSystem.get(new URI("hdfs://sandbox.hortonworks.com:8020"),conf);
-            BufferedReader br=new BufferedReader(new InputStreamReader(fs.open(pt)));
-            List<String> lines = new ArrayList<String>();
-
-            String line=br.readLine();
-            String topLine = line;
-            line=br.readLine();
-            while (line != null){
-                lines.add(line.trim());
-                line=br.readLine();
-            }
-
-            System.out.println("WP STEP 1 " + lines.size());
-            for (String l : lines) {
-                Matcher m = p.matcher(l);
-                m.matches();
-                while (m.find()) {
-                    urls.add(m.group());
-                }
-            }
-
-            System.out.println("WP STEP 2 " +urls.size());
+        try {
+            List<String> lines = HDFSHelper.readLines(new Path(Constants.HDFS_ROOT_PATH + inputPath));
             List<List<String>> totalTopWords = new ArrayList<>();
-            for (String u : urls) {
-                System.out.println("WP STEP 2 URL :  " +u);
-                Document d = Jsoup.connect(u).timeout(0).get();
-                String text = d.body().text();
+            List<String> resultLines = new ArrayList<>();
 
-                StringTokenizer tokenizer = new StringTokenizer(text, " .,?!:;()<>[]\b\t\n\f\r\"\'\\");
-                List<String> words = new ArrayList<String>();
-                while(tokenizer.hasMoreTokens()) {
-                    words.add(tokenizer.nextToken());
-                    //System.out.println(tokenizer.nextToken());
-                }
+            for (int i = startN; i < endN; ++i) {
+                String line = lines.get(i);
+                String link = WordProcessorHelper.extractLink(line);
+                String text = WordProcessorHelper.extractTextFromUrl(link);
+
+                List<String> words = Pattern.compile("\\W").splitAsStream(text)
+                        .filter((s -> !s.isEmpty()))
+                        .filter(w -> !Pattern.compile("\\d+").matcher(w).matches())
+                        .filter(w -> !stopWords.contains(w))
+                        .collect(toList());
 
                 List<String> topWords = words.stream()
                         .map(String::toLowerCase)
                         .collect(groupingBy(Function.identity(), counting()))
                         .entrySet().stream()
-                        .sorted(Map.Entry.<String, Long> comparingByValue(reverseOrder()).thenComparing(Map.Entry.comparingByKey()))
+                        .sorted(Map.Entry.<String, Long>comparingByValue(reverseOrder()).thenComparing(Map.Entry.comparingByKey()))
                         .limit(10)
                         .map(Map.Entry::getKey)
                         .collect(toList());
                 totalTopWords.add(topWords);
             }
 
-            System.out.println("WP STEP 3 " +totalTopWords.size());
-            try{
-                Path ptOut=new Path("hdfs://sandbox.hortonworks.com:8020/tmp/admin/user.profile.tags.us.min.out.txt");
-                Configuration confOut = new Configuration();
-                confOut.set("fs.hdfs.impl", org.apache.hadoop.hdfs.DistributedFileSystem.class.getName());
-                confOut.set("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem.class.getName());
-
-                FileSystem fsOut = FileSystem.get(new URI("hdfs://sandbox.hortonworks.com:8020"),confOut);
-
-                BufferedWriter brOut = new BufferedWriter(new OutputStreamWriter(fsOut.create(ptOut,true)));
-
-                brOut.write(topLine);
-                brOut.write("\n");
-                System.out.println("WP STEP 4");
-                for (int i = 0; i < lines.size(); i++) {
-                    String currentLine = lines.get(i);
-                    String[] params = currentLine.split("\\s+");
-                    for (int j = 0; j < params.length; j++) {
-                        if (j == 1) {
-                            List<String> currentTopWords = totalTopWords.get(i);
-
-                            for (int k = 0; k < currentTopWords.size(); k++) {
-                                brOut.write(currentTopWords.get(k));
-                                if (k < (currentTopWords.size()-1)) {
-                                    brOut.write(",");
-                                }
-                            }
-                            brOut.write(" ");
-                        }
-                        brOut.write(params[j]);
-                        if (j < (params.length-1)) {
-                            brOut.write(" ");
-                        }
+            for (int i = 0; i <= lines.size() - 1; i++) {
+                String currentLine = lines.get(i);
+                String totalWords = "";
+                List<String> words = totalTopWords.get(i);
+                for (int j = 0; j < words.size(); j++) {
+                    if (j > 0) {
+                        totalWords += ",";
                     }
-                    brOut.write("\n");
+                    totalWords += words.get(j);
                 }
-
-                System.out.println("WP STEP 5");
-                brOut.close();
-            }catch(Exception e) {
-                System.out.println(e.getMessage());
+                String resultText = currentLine.replaceFirst("\\s", " " + totalWords);
+                resultLines.add(resultText);
             }
-        }catch(Exception e){
+            HDFSHelper.writeLines(resultLines, inputPath + "lines_" + startN + "_" + endN);
+
+        } catch (Exception e) {
             System.out.println(e.getMessage());
         }
-
-    }
-
-    public static void main(String[] args) throws Exception {
-        WordProcessor wp = new WordProcessor();
-        wp.run(args);
     }
 }

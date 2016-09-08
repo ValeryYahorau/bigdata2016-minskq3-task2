@@ -35,18 +35,18 @@ public class Client {
 
     public void run(String[] args) throws Exception {
 
+        final String inputPath = args[0];
         //n - is number of containers,
-        final int n = Integer.valueOf(args[0]);
-        final Path jarPath = new Path(args[1]);
+        final int n = Integer.valueOf(args[1]);
+        final Path jarPath = new Path(args[2]);
 
-        System.out.println("STEP 1 " + n + " | " + args[1]);
-        // Create yarnClient
+        // Configure and create yarnClient
         YarnConfiguration conf = new YarnConfiguration();
         YarnClient yarnClient = YarnClient.createYarnClient();
         yarnClient.init(conf);
         yarnClient.start();
-        System.out.println("STEP 2 ");
-        // Create application via yarnClient
+
+        // Create yarn client application
         YarnClientApplication app = yarnClient.createApplication();
 
         // Set up the container launch context for the application master
@@ -54,8 +54,10 @@ public class Client {
         amContainer.setCommands(
                 Collections.singletonList(
                         "$JAVA_HOME/bin/java" +
-                                " -Xmx256M" +
+                                " -Xmx256M -Xmx512M" +
                                 " com.epam.bigdata2016.minskq3.task2.ApplicationMaster" +
+                                " " + inputPath +
+                                " " + String.valueOf(n) +
                                 " 1>" + ApplicationConstants.LOG_DIR_EXPANSION_VAR + "/stdout" +
                                 " 2>" + ApplicationConstants.LOG_DIR_EXPANSION_VAR + "/stderr"
                 )
@@ -64,7 +66,7 @@ public class Client {
         // Setup jar for ApplicationMaster
         LocalResource appMasterJar = Records.newRecord(LocalResource.class);
         setupAppMasterJar(jarPath, appMasterJar);
-        amContainer.setLocalResources(Collections.singletonMap("bigdata2016-minskq3-task2-1.2.0-jar-with-dependencies.jar", appMasterJar));
+        amContainer.setLocalResources(Collections.singletonMap("bigdata2016-minskq3-task2-1.0.0-jar-with-dependencies.jar", appMasterJar));
 
         // Setup CLASSPATH for ApplicationMaster
         Map<String, String> appMasterEnv = new HashMap<String, String>();
@@ -73,9 +75,9 @@ public class Client {
 
         // Set up resource type requirements for ApplicationMaster
         Resource capability = Records.newRecord(Resource.class);
-        capability.setMemory(256);
-        capability.setVirtualCores(1);
-        System.out.println("STEP 3");
+        capability.setMemory(512);
+        capability.setVirtualCores(2);
+
         // Finally, set-up ApplicationSubmissionContext for the application
         ApplicationSubmissionContext appContext = app.getApplicationSubmissionContext();
         appContext.setApplicationName("bigdata2016-minskq3-task2"); // application name
@@ -87,7 +89,6 @@ public class Client {
         ApplicationId appId = appContext.getApplicationId();
         System.out.println("Submitting application " + appId);
         yarnClient.submitApplication(appContext);
-        System.out.println("STEP 4");
         ApplicationReport appReport = yarnClient.getApplicationReport(appId);
         YarnApplicationState appState = appReport.getYarnApplicationState();
         while (appState != YarnApplicationState.FINISHED &&
@@ -97,12 +98,11 @@ public class Client {
             appReport = yarnClient.getApplicationReport(appId);
             appState = appReport.getYarnApplicationState();
         }
-        System.out.println("Application Diagnostic" + appReport.getDiagnostics());
+        System.out.println("Application diagnostic " + appReport.getDiagnostics());
         System.out.println("Application " + appId + " finished with" + " state " + appState + " at " + appReport.getFinishTime());
     }
 
     private void setupAppMasterJar(Path jarPath, LocalResource appMasterJar) throws IOException {
-        System.out.println("STEP X");
         FileStatus jarStat = FileSystem.get(conf).getFileStatus(jarPath);
         appMasterJar.setResource(ConverterUtils.getYarnUrlFromPath(jarPath));
         appMasterJar.setSize(jarStat.getLen());
@@ -112,7 +112,6 @@ public class Client {
     }
 
     private void setupAppMasterEnv(Map<String, String> appMasterEnv) {
-        System.out.println("STEP Y");
         for (String c : conf.getStrings(YarnConfiguration.YARN_APPLICATION_CLASSPATH, YarnConfiguration.DEFAULT_YARN_APPLICATION_CLASSPATH)) {
             Apps.addToEnvironment(appMasterEnv, Environment.CLASSPATH.name(), c.trim());
         }
