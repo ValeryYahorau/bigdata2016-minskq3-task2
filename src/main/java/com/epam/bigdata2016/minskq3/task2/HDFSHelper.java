@@ -103,15 +103,12 @@ public class HDFSHelper {
     }
 
     public static void writeLines(List<String> lines, String filePath) {
-        System.out.println("Start writing1");
         try {
             Path ptOut = new Path(Constants.HDFS_ROOT_PATH + filePath);
 
             FileSystem fsOut = FileSystem.get(new URI(Constants.HDFS_ROOT_PATH), conf);
             BufferedWriter brOut = new BufferedWriter(new OutputStreamWriter(fsOut.create(ptOut, true)));
-            System.out.println("Start writing2");
             for (String line : lines) {
-                System.out.println("Start writing3");
                 System.out.println(line);
                 brOut.write(line);
                 brOut.write("\n");

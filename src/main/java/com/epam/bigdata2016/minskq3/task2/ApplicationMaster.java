@@ -56,10 +56,10 @@ public class ApplicationMaster implements AMRMClientAsync.CallbackHandler {
     }
 
     public static void main(String[] args) throws Exception {
-        //final String inputPath = args[0];
-        //final int n = Integer.valueOf(args[1]);
-        final String inputPath = "/tmp/admin/user.profile.tags.us.min3.txt";
-        final int n = 2;
+        final String inputPath = args[0];
+        final int n = Integer.valueOf(args[1]);
+        //final String inputPath = "/tmp/admin/user.profile.tags.us.min3.txt";
+        //final int n = 2;
         ApplicationMaster appMaster = new ApplicationMaster(inputPath, n);
         appMaster.run();
     }
