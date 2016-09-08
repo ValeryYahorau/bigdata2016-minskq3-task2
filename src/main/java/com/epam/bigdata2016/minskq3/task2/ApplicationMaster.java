@@ -145,7 +145,7 @@ public class ApplicationMaster implements AMRMClientAsync.CallbackHandler {
 
                 LocalResource appMasterJar = Records.newRecord(LocalResource.class);
                 setupAppMasterJar(Constants.HDFS_MY_APP_JAR_PATH, appMasterJar);
-                ctx.setLocalResources(Collections.singletonMap("bigdata2016-minskq3-task2-1.0.0-jar-with-dependencies.jar", appMasterJar));
+                ctx.setLocalResources(Collections.singletonMap(Constants.JAR_NAME, appMasterJar));
 
                 nmClient.startContainer(container, ctx);
             } catch (Exception e) {

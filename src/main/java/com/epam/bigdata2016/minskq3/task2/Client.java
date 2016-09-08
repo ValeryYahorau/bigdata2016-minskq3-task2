@@ -66,7 +66,7 @@ public class Client {
         // Setup jar for ApplicationMaster
         LocalResource appMasterJar = Records.newRecord(LocalResource.class);
         setupAppMasterJar(jarPath, appMasterJar);
-        amContainer.setLocalResources(Collections.singletonMap("bigdata2016-minskq3-task2-1.0.0-jar-with-dependencies.jar", appMasterJar));
+        amContainer.setLocalResources(Collections.singletonMap(Constants.JAR_NAME, appMasterJar));
 
         // Setup CLASSPATH for ApplicationMaster
         Map<String, String> appMasterEnv = new HashMap<String, String>();

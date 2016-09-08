@@ -57,7 +57,7 @@ public class WordProcessor {
                 totalTopWords.add(topWords);
             }
 
-            for (int i = 0; i <= lines.size() - 1; i++) {
+            for (int i = 0; i < lines.size(); i++) {
                 String currentLine = lines.get(i);
                 String totalWords = "";
                 List<String> words = totalTopWords.get(i);
@@ -68,7 +68,7 @@ public class WordProcessor {
                     totalWords += words.get(j);
                 }
                 String resultText = currentLine.replaceFirst("\\s", " " + totalWords);
-                System.out.println("result text " + resultText);
+                System.out.println("result text: " + resultText);
                 resultLines.add(resultText);
             }
             StringBuilder sb = new StringBuilder();
