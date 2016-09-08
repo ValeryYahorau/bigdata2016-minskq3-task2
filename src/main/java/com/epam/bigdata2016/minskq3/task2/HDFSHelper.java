@@ -106,9 +106,7 @@ public class HDFSHelper {
                 brOut.write(line);
                 brOut.write("\n");
             }
-
             brOut.close();
-            fsOut.close();
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
