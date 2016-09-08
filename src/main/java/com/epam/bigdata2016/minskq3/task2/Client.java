@@ -56,8 +56,8 @@ public class Client {
                         "$JAVA_HOME/bin/java" +
                                 " -Xmx256M -Xmx512M" +
                                 " com.epam.bigdata2016.minskq3.task2.ApplicationMaster" +
-                                " " + inputPath +
-                                " " + String.valueOf(n) +
+//                                " " + inputPath +
+//                                " " + String.valueOf(n) +
                                 " 1>" + ApplicationConstants.LOG_DIR_EXPANSION_VAR + "/stdout" +
                                 " 2>" + ApplicationConstants.LOG_DIR_EXPANSION_VAR + "/stderr"
                 )
