@@ -71,6 +71,7 @@ public class WordProcessor {
                 System.out.println("result text: " + resultText);
                 resultLines.add(resultText);
             }
+            System.out.println("COUNT !!! " + resultLines.size());
             StringBuilder sb = new StringBuilder();
             int index = inputPath.lastIndexOf('/');
             String outpurPath = inputPath.substring(0,index);
@@ -85,6 +86,7 @@ public class WordProcessor {
             HDFSHelper.writeLines(resultLines, sb.toString());
 
         } catch (Exception e) {
+            System.out.println("Error");
             System.out.println(e.getMessage());
         }
     }

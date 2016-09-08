@@ -80,7 +80,7 @@ public class Client {
 
         // Finally, set-up ApplicationSubmissionContext for the application
         ApplicationSubmissionContext appContext = app.getApplicationSubmissionContext();
-        appContext.setApplicationName("bigdata2016-minskq3-task2"); // application name
+        appContext.setApplicationName(Constants.APP_NAME); // application name
         appContext.setAMContainerSpec(amContainer);
         appContext.setResource(capability);
         appContext.setQueue("default"); // queue
