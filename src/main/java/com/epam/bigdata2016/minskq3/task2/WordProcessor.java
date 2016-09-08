@@ -25,7 +25,8 @@ public class WordProcessor {
     }
 
     public void run(String inputPath, int startN, int endN) {
-
+        System.out.println("PARAMS");
+        System.out.println(inputPath + "_" + startN + "_" + endN);
         try {
             List<String> lines = HDFSHelper.readLines(new Path(Constants.HDFS_ROOT_PATH + inputPath));
             List<List<String>> totalTopWords = new ArrayList<>();
@@ -33,8 +34,11 @@ public class WordProcessor {
 
             for (int i = startN; i < endN; ++i) {
                 String line = lines.get(i);
+                System.out.println("line:" + line);
                 String link = WordProcessorHelper.extractLink(line);
+                System.out.println("link:" + link);
                 String text = WordProcessorHelper.extractTextFromUrl(link);
+                System.out.println("text:" + text);
 
                 List<String> words = Pattern.compile("\\W").splitAsStream(text)
                         .filter((s -> !s.isEmpty()))
@@ -64,6 +68,7 @@ public class WordProcessor {
                     totalWords += words.get(j);
                 }
                 String resultText = currentLine.replaceFirst("\\s", " " + totalWords);
+                System.out.println("result text " + resultText);
                 resultLines.add(resultText);
             }
             HDFSHelper.writeLines(resultLines, inputPath + "lines_" + startN + "_" + endN);
