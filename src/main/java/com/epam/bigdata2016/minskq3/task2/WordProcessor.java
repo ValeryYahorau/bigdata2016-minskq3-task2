@@ -80,6 +80,8 @@ public class WordProcessor {
             sb.append("_");
             sb.append(endN);
             sb.append(".txt");
+
+            System.out.println("Start writing 0 " + sb.toString());
             HDFSHelper.writeLines(resultLines, sb.toString());
 
         } catch (Exception e) {

@@ -18,9 +18,6 @@ public class Utils {
                 startN = endN - step + (current * step - total);
             }
         }
-        if (startN == 0 ) {
-            startN = 1;
-        }
         return new int[]{startN, endN};
     }
 }
