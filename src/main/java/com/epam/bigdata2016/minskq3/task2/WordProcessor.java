@@ -31,12 +31,14 @@ public class WordProcessor {
             List<String> lines = HDFSHelper.readLines(new Path(Constants.HDFS_ROOT_PATH + inputPath));
             List<List<String>> totalTopWords = new ArrayList<>();
             List<String> resultLines = new ArrayList<>();
+            List<String> currentLines = new ArrayList<>();
 
             if (startN == 0) {
                 startN = 1;
             }
             for (int i = startN; i < endN; ++i) {
                 String line = lines.get(i);
+                currentLines.add(line);
                 System.out.println("line:" + line);
                 String link = WordProcessorHelper.extractLink(line);
                 System.out.println("link:" + link);
@@ -60,8 +62,8 @@ public class WordProcessor {
                 totalTopWords.add(topWords);
             }
 
-            for (int i = startN; i < endN; ++i) {
-                String currentLine = lines.get(i);
+            for (int i = 0; i < currentLines.size(); ++i) {
+                String currentLine = currentLines.get(i);
                 String totalWords = "";
                 List<String> words = totalTopWords.get(i);
                 for (int j = 0; j < words.size(); j++) {
