@@ -47,7 +47,7 @@ public class WordProcessorHelper {
             }
             return sb.toString();
         } catch (IOException e) {
-            System.err.println(e.getMessage());
+            System.out.println(e.getMessage());
             String words = extractWordsFromUrl(url);
             return words;
         }

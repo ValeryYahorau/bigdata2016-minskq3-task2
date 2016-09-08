@@ -32,6 +32,9 @@ public class WordProcessor {
             List<List<String>> totalTopWords = new ArrayList<>();
             List<String> resultLines = new ArrayList<>();
 
+            if (startN == 0) {
+                startN = 1;
+            }
             for (int i = startN; i < endN; ++i) {
                 String line = lines.get(i);
                 System.out.println("line:" + line);
@@ -74,7 +77,7 @@ public class WordProcessor {
             System.out.println("COUNT !!! " + resultLines.size());
             StringBuilder sb = new StringBuilder();
             int index = inputPath.lastIndexOf('/');
-            String outpurPath = inputPath.substring(0,index);
+            String outpurPath = inputPath.substring(0, index);
             sb.append(outpurPath);
             sb.append("tasl2_lines_");
             sb.append(startN);

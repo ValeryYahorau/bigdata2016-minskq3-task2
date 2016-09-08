@@ -31,65 +31,75 @@ public class HDFSHelper {
         conf.set("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem.class.getName());
     }
 
-    public static int countLines(Path location) throws Exception {
-        int num = 0;
+    public static int countLines(Path location) {
+        try {
+            int num = 0;
 
-        FileSystem fileSystem = FileSystem.get(location.toUri(), conf);
-        CompressionCodecFactory factory = new CompressionCodecFactory(conf);
-        FileStatus[] items = fileSystem.listStatus(location);
+            FileSystem fileSystem = FileSystem.get(location.toUri(), conf);
+            CompressionCodecFactory factory = new CompressionCodecFactory(conf);
+            FileStatus[] items = fileSystem.listStatus(location);
 
-        if (items == null) {
+            if (items == null) {
+                return num;
+            }
+
+            for (FileStatus item : items) {
+                if (item.getPath().getName().startsWith("_")) {
+                    continue;
+                }
+
+                CompressionCodec codec = factory.getCodec(item.getPath());
+                InputStream stream = null;
+                if (codec != null) {
+                    stream = codec.createInputStream(fileSystem.open(item.getPath()));
+                } else {
+                    stream = fileSystem.open(item.getPath());
+                }
+
+                StringWriter writer = new StringWriter();
+                IOUtils.copy(stream, writer, "UTF-8");
+                String raw = writer.toString();
+                num = raw.split("\n").length;
+            }
+
             return num;
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return 0;
         }
-
-        for (FileStatus item : items) {
-            if (item.getPath().getName().startsWith("_")) {
-                continue;
-            }
-
-            CompressionCodec codec = factory.getCodec(item.getPath());
-            InputStream stream = null;
-            if (codec != null) {
-                stream = codec.createInputStream(fileSystem.open(item.getPath()));
-            } else {
-                stream = fileSystem.open(item.getPath());
-            }
-
-            StringWriter writer = new StringWriter();
-            IOUtils.copy(stream, writer, "UTF-8");
-            String raw = writer.toString();
-            num = raw.split("\n").length;
-        }
-
-        return num;
     }
 
-    public static List<String> readLines(Path location) throws Exception {
-        FileSystem fileSystem = FileSystem.get(location.toUri(), conf);
-        CompressionCodecFactory factory = new CompressionCodecFactory(conf);
-        FileStatus[] items = fileSystem.listStatus(location);
-        if (items == null) return new ArrayList<>();
-        List<String> results = new ArrayList<>();
-        for (FileStatus item : items) {
-            if (item.getPath().getName().startsWith("_")) {
-                continue;
+    public static List<String> readLines(Path location) {
+        try {
+            FileSystem fileSystem = FileSystem.get(location.toUri(), conf);
+            CompressionCodecFactory factory = new CompressionCodecFactory(conf);
+            FileStatus[] items = fileSystem.listStatus(location);
+            if (items == null) return new ArrayList<>();
+            List<String> results = new ArrayList<>();
+            for (FileStatus item : items) {
+                if (item.getPath().getName().startsWith("_")) {
+                    continue;
+                }
+
+                CompressionCodec codec = factory.getCodec(item.getPath());
+                InputStream stream;
+                if (codec != null) {
+                    stream = codec.createInputStream(fileSystem.open(item.getPath()));
+                } else {
+                    stream = fileSystem.open(item.getPath());
+                }
+
+                StringWriter writer = new StringWriter();
+                IOUtils.copy(stream, writer, "UTF-8");
+                String raw = writer.toString();
+                Collections.addAll(results, raw.split("\n"));
             }
 
-            CompressionCodec codec = factory.getCodec(item.getPath());
-            InputStream stream;
-            if (codec != null) {
-                stream = codec.createInputStream(fileSystem.open(item.getPath()));
-            } else {
-                stream = fileSystem.open(item.getPath());
-            }
-
-            StringWriter writer = new StringWriter();
-            IOUtils.copy(stream, writer, "UTF-8");
-            String raw = writer.toString();
-            Collections.addAll(results, raw.split("\n"));
+            return results;
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return new ArrayList<>();
         }
-
-        return results;
     }
 
     public static void writeLines(List<String> lines, String filePath) {
