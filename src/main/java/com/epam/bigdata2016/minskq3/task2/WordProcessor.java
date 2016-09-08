@@ -60,7 +60,7 @@ public class WordProcessor {
                 totalTopWords.add(topWords);
             }
 
-            for (int i = 0; i < lines.size(); i++) {
+            for (int i = startN; i < endN; ++i) {
                 String currentLine = lines.get(i);
                 String totalWords = "";
                 List<String> words = totalTopWords.get(i);
