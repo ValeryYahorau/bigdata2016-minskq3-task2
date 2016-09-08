@@ -71,7 +71,16 @@ public class WordProcessor {
                 System.out.println("result text " + resultText);
                 resultLines.add(resultText);
             }
-            HDFSHelper.writeLines(resultLines, inputPath + "lines_" + startN + "_" + endN);
+            StringBuilder sb = new StringBuilder();
+            int index = inputPath.lastIndexOf('/');
+            String outpurPath = inputPath.substring(0,index);
+            sb.append(outpurPath);
+            sb.append("tasl2_lines_");
+            sb.append(startN);
+            sb.append("_");
+            sb.append(endN);
+            sb.append(".txt");
+            HDFSHelper.writeLines(resultLines, sb.toString());
 
         } catch (Exception e) {
             System.out.println(e.getMessage());

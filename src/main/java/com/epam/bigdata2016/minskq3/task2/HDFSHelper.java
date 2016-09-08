@@ -98,7 +98,7 @@ public class HDFSHelper {
 
             FileSystem fsOut = FileSystem.get(new URI(Constants.HDFS_ROOT_PATH), conf);
             BufferedWriter brOut = new BufferedWriter(new OutputStreamWriter(fsOut.create(ptOut, true)));
-
+            System.out.println("Start writing");
             for (String line : lines) {
                 System.out.println(line);
                 brOut.write(line);
@@ -108,7 +108,7 @@ public class HDFSHelper {
             brOut.close();
             fsOut.close();
         } catch (Exception e) {
-            System.err.println(e.getLocalizedMessage());
+            System.out.println(e.getMessage());
         }
     }
 }
