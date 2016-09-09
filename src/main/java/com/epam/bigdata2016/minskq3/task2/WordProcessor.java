@@ -14,7 +14,7 @@ import static java.util.stream.Collectors.*;
 
 public class WordProcessor {
 
-    private List<String> stopWords = Arrays.asList("a", "and", "for", "to", "the", "you", "in");
+    private List<String> stopWords = Arrays.asList("a", "and", "to", "the", "in", "badword1", "badword2");
 
     public static void main(String[] args) throws Exception {
         final String inputPath = args[0];
