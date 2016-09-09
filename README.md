@@ -41,4 +41,4 @@ yarn jar /root/Documents/bigdata2016-minskq3-task2/target/bigdata2016-minskq3-ta
 ###STEP 5
 Results
 
-Check folder /tmp/admin/ and find out result fiels there.
+Check folder /tmp/admin/ and find out result files there.
